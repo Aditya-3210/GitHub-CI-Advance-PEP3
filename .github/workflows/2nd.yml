@@ -38,3 +38,33 @@ jobs:
         with:
           name: app-artifact
           path: 2nd.tar.gz
+
+deploy-dev:
+    needs: package
+    runs-on: ubuntu-latest
+    environment: dev
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: app-artifact-flask
+
+      - name: Deploy to DEV
+        run: |
+          echo "Deploying to DEV"
+          mkdir dev-release
+          tar -xzf flask-app.tar.gz -C dev-release
+
+deploy-prod:
+    needs: deploy-dev
+    runs-on: ubuntu-latest
+    environment: prod
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: app-artifact-flask
+
+      - name: Deploy to PROD
+        run: |
+          echo "Deploying to PROD"
+          mkdir prod-release
+          tar -xzf flask-app.tar.gz -C prod-release
