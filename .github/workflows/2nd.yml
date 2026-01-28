@@ -29,42 +29,48 @@ jobs:
 
       - name: Build Artifact
         run: |
-          mkdir build
-          cp app1.py requirements.txt build/
-          tar -czf 2nd.tar.gz build/
+          mkdir -p build
+          cp app.py requirements.txt build/
+          tar -czf app.tar.gz build/
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: app-artifact
-          path: 2nd.tar.gz
+          path: app.tar.gz
 
-deploy-dev:
-    needs: package
+  deploy-dev:
     runs-on: ubuntu-latest
+    needs: test
     environment: dev
+
     steps:
-      - uses: actions/download-artifact@v4
+      - name: Download Artifact
+        uses: actions/download-artifact@v4
         with:
-          name: app-artifact-flask
+          name: app-artifact
 
       - name: Deploy to DEV
         run: |
           echo "Deploying to DEV"
-          mkdir dev-release
-          tar -xzf flask-app.tar.gz -C dev-release
+          mkdir -p dev-release
+          tar -xzf app.tar.gz -C dev-release
+          ls -R dev-release
 
-deploy-prod:
-    needs: deploy-dev
+  deploy-prod:
     runs-on: ubuntu-latest
+    needs: deploy-dev
     environment: prod
+
     steps:
-      - uses: actions/download-artifact@v4
+      - name: Download Artifact
+        uses: actions/download-artifact@v4
         with:
-          name: app-artifact-flask
+          name: app-artifact
 
       - name: Deploy to PROD
         run: |
           echo "Deploying to PROD"
-          mkdir prod-release
-          tar -xzf flask-app.tar.gz -C prod-release
+          mkdir -p prod-release
+          tar -xzf app.tar.gz -C prod-release
+          ls -R prod-release
